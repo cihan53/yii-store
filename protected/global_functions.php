@@ -25,7 +25,7 @@ function get_params($key) {
 
 /* return baseUrl */
 
-function store_baseurl() {
+function get_baseurl() {
     return Yii::app()->getBaseUrl(true);
 }
 
@@ -73,6 +73,37 @@ function __t($text = '', $echo = true) {
         return Yii::t('app', $text);
 }
 
+
+/*
+ * get request parametre
+ */
+
+function query_param($key, $defaultValue = null, $echo = true) {
+    if ($echo) {
+        echo Yii::app()->request->getQuery($key, $defaultValue);
+    } else {
+        return Yii::app()->request->getQuery($key, $defaultValue);
+    }
+}
+
+
+/*
+ * db command
+ */
+
+function qr_result($sql = '', $param = array()) {
+    if (count($param) > 0) {
+
+
+        $command = yii::app()->db->createCommand($sql, $param);
+        foreach ($param as $k => $v) {
+            $command->bindParam($k, $v);
+        }
+        return $command->queryall();
+    } else {
+        return yii::app()->db->createCommand($sql)->queryall();
+    }
+}
 /*
  * mail send
  */
