@@ -103,6 +103,53 @@ function get_style() {
     echo '<link rel="stylesheet" type="text/css" href="' . Yii::app()->theme->baseUrl . '/style.css' . '"/>';
 }
 
+/*
+ * template install function
+ * @param template name
+ * return boolean
+ */
+
+function install_template($param) {
+    if (!is_install_template($param)) {
+        
+    }
+}
+
+/*
+ * template is instaled
+ * return boolean
+ */
+
+function is_install_template($param) {
+    $criteria = new CDbCriteria();
+    $criteria->select = '*';
+    $criteria->condition = 'name=:name';
+    $criteria->params = array(':name' => $param);
+    $model = Template::model()->find($criteria);
+    if ($model) {
+        return $model->getAttributes();
+    } else {
+        return false;
+    }
+}
+
+/*
+ * get active template
+ * return array 
+ */
+
+function get_theme() {
+    $criteria = new CDbCriteria();
+    $criteria->select = '*';
+    $criteria->condition = 'status=1';
+    $model = Template::model()->find($criteria);
+    if ($model) {
+        return $model->getAttributes();
+    } else {
+        return array('name' => 'default');
+    }
+}
+
 
         
 /*
@@ -143,11 +190,45 @@ function qr_result($sql = '', $param = array()) {
     }
 }
 
+
+
+/*
+ * file header data
+ */
+
+function get_file_data($file, $default_headers, $context = '') {
+
+
+    // We don't need to write to the file, so just open for reading.
+    $fp = fopen($file, 'r');
+
+    // Pull only the first 8kiB of the file in.
+    $file_data = fread($fp, 8192);
+
+    // PHP will close file handle, but we are good citizens.
+    fclose($fp);
+
+    foreach ($default_headers as $field => $regex) {
+        preg_match('/' . preg_quote($regex, '/') . ':(.*)$/mi', $file_data, ${$field});
+        if (!empty(${$field}))
+            ${$field} = trim(preg_replace("/\s*(?:\*\/|\?>).*/", '', ${$field}[1]));
+        else
+            ${$field} = '';
+    }
+
+    $file_data = compact(array_keys($default_headers));
+
+    return $file_data;
+}
+
+
+
+
 /*
  * mail send
  */
 
-function send_mail($name, $subject = 'Yeni Siparis', $email, $body = '', $extra_header = array()) {
+function send_mail($name, $subject = '', $email, $body = '', $extra_header = array()) {
     $adminEmail = Yii::app()->params['adminEmail'];
     $name = '=?UTF-8?B?' . base64_encode($name) . '?=';
     $subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -158,7 +239,7 @@ function send_mail($name, $subject = 'Yeni Siparis', $email, $body = '', $extra_
 
     mail(Yii::app()->params['adminEmail'], $subject, $body, $headers);
 
-    $headers = "From: Zamane Elektronik <{$adminEmail}>\r\n" .
+    $headers = "From: {$adminEmail}\r\n" .
             "Reply-To: {$adminEmail}\r\n" .
             "MIME-Version: 1.0\r\n" .
             "Content-type: text/html; charset=UTF-8";
