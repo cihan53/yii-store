@@ -39,6 +39,42 @@ function store_url($echo = true) {
     }
 }
 
+/* return site meta */
+
+function site_descript($echo = true) {
+    if ($echo) {
+        //Yii::log(Yii::app()->params);
+        echo Yii::app()->params['options']['meta_description'];
+    } else {
+        return Yii::app()->params['options']['meta_description'];
+    }
+}
+
+
+
+
+/* return store theme path 
+ * @echo boolean print option
+ */
+
+function get_theme_path($echo = true) {
+    if ($echo)
+        echo Yii::app()->theme->basePath;
+    else
+        return Yii::app()->theme->basePath;
+}
+
+/* return store theme url 
+ * @echo boolean print option
+ */
+
+function get_theme_url($echo = true) {
+    if ($echo)
+        echo Yii::app()->theme->baseUrl;
+    else
+        return Yii::app()->theme->baseUrl;
+}
+
 /*
  * get admin url
  */
@@ -61,18 +97,21 @@ function get_user_id($echo = true) {
     }
 }
 
-/*
- * translate
- */
+/* return site style sheet */
 
-function __t($text = '', $echo = true) {
-
-    if ($echo) {
-        echo Yii::t('app', $text);
-    } else
-        return Yii::t('app', $text);
+function get_style() {
+    echo '<link rel="stylesheet" type="text/css" href="' . Yii::app()->theme->baseUrl . '/style.css' . '"/>';
 }
 
+
+        
+/*
+ * Translate
+ */
+
+function __($category = 'store', $message = '', $params = array()) {
+    return Yii::t($category, $message, $params);
+}
 
 /*
  * get request parametre
@@ -85,7 +124,6 @@ function query_param($key, $defaultValue = null, $echo = true) {
         return Yii::app()->request->getQuery($key, $defaultValue);
     }
 }
-
 
 /*
  * db command
@@ -104,6 +142,7 @@ function qr_result($sql = '', $param = array()) {
         return yii::app()->db->createCommand($sql)->queryall();
     }
 }
+
 /*
  * mail send
  */
