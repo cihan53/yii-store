@@ -156,7 +156,7 @@ function site_descript($echo = true) {
     }
 }
 
-/* ===================================== THEME FUNCTION END========================================== */
+/* ===================================== THEME FUNCTION========================================== */
 
 
 /* return store theme path 
@@ -188,30 +188,6 @@ function get_theme_url($echo = true) {
 function get_admin_url($p = '/') {
     $module_id = yii::app()->getModule('manager')->id;
     return '/' . $module_id . $p;
-}
-
-/*
- * get base path
- */
-
-function getRoot($echo = true) {
-    if ($echo) {
-        echo Yii::app()->basePath;
-    } else {
-        return Yii::app()->basePath;
-    }
-}
-
-/*
- * get base path
- */
-
-function createUrl($url, $echo = true) {
-    if ($echo) {
-        echo Yii::app()->createUrl($url);
-    } else {
-        return Yii::app()->createUrl($url);
-    }
 }
 
 /*
@@ -318,6 +294,30 @@ function get_file_data($file, $default_headers, $context = '') {
 
 function __($category = 'store', $message = '', $params = array()) {
     return Yii::t($category, $message, $params);
+}
+
+/*
+ * get base path
+ */
+
+function getRoot($echo = true) {
+    if ($echo) {
+        echo Yii::app()->basePath;
+    } else {
+        return Yii::app()->basePath;
+    }
+}
+
+/*
+ * get base path
+ */
+
+function createUrl($url, $echo = true) {
+    if ($echo) {
+        echo Yii::app()->createUrl($url);
+    } else {
+        return Yii::app()->createUrl($url);
+    }
 }
 
 /*
