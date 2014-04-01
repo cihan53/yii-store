@@ -338,8 +338,6 @@ function query_param($key, $defaultValue = null, $echo = true) {
 
 function qr_result($sql = '', $param = array()) {
     if (count($param) > 0) {
-
-
         $command = yii::app()->db->createCommand($sql, $param);
         foreach ($param as $k => $v) {
             $command->bindParam($k, $v);
