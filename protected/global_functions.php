@@ -1,14 +1,17 @@
 <?php
 
+/* global */
+$_controller = null;
+
 /*
  * return site title
  */
 
 function the_title($echo = true) {
     if ($echo) {
-        echo Yii::app()->params['title'];
+        echo isset(Yii::app()->params['title']) ? Yii::app()->params['title'] : yii::app()->name;
     } else {
-        return Yii::app()->params['title'];
+        return isset(Yii::app()->params['title']) ? Yii::app()->params['title'] : yii::app()->name;
     }
 }
 
@@ -22,6 +25,109 @@ function get_params($key) {
     }
     return false;
 }
+
+/* ===================================== USER FUNCTION ============================================ */
+
+/*
+ * get user id
+ */
+
+function get_user_id($echo = true) {
+    if ($echo) {
+        echo Yii::app()->user->isGuest ? 'guest' : Yii::app()->user->id;
+    } else {
+        return Yii::app()->user->isGuest ? 'guest' : Yii::app()->user->id;
+    }
+}
+
+/*
+ * get user id
+ */
+
+function get_user_name($echo = true) {
+    if ($echo) {
+        echo Yii::app()->user->isGuest ? 'guest' : Yii::app()->user->name;
+    } else {
+        return Yii::app()->user->isGuest ? 'guest' : Yii::app()->user->name;
+    }
+}
+
+/*
+ * get customer attr
+ */
+
+function getUserAttr($attr, $echo = true) {
+    if ($echo) {
+        if (isset(Yii::app()->user->$attr))
+            echo Yii::app()->user->$attr;
+        else
+            echo "";
+    } else {
+        if (isset(Yii::app()->user->$attr))
+            return Yii::app()->user->$attr;
+        else
+            return '';
+    }
+}
+
+/* ===================================== USER FUNCTION END ============================================ */
+
+
+
+/* ===================================== SCRIPT FUNCTION ============================================== */
+/*
+ * Register script
+ * @param filepath
+ * @param position 
+ */
+
+function register_script($script_id = "", $script = "", $position = CClientScript::POS_READY) {
+
+    if ($script_id == "") {
+        $script_id = "srript_" . rand(0, 200000);
+    }
+
+
+    Yii::app()->getClientScript()->registerScript($script_id, $script, $position);
+}
+
+/*
+ * Register script file
+ * @param filepath
+ * @param position 
+ */
+
+function register_script_file($fileName, $position = CClientScript::POS_HEAD) {
+    Yii::app()->getClientScript()->registerScriptFile($fileName, $position);
+}
+
+/* ===================================== SCRIPT FUNCTION END ========================================== */
+
+
+/* ===================================== DATE TIME FUNCTION ========================================== */
+
+/*
+ * format date
+ */
+
+function getFormatDate($date = '', $format = 'yyyy-MM-dd', $echo = true) {
+    if ($date == '') {
+        $timestamp = strtotime(date('Y-m-d H:i:s'));
+    } else {
+        $timestamp = strtotime($date);
+    }
+
+    $dateFormatter = yii::app()->dateFormatter;
+
+
+    if ($echo) {
+        echo $dateFormatter->format($format, $timestamp);
+        ;
+    } else
+        return $dateFormatter->format($format, $timestamp);
+}
+
+/* ===================================== DATE TIME FUNCTION END========================================== */
 
 /* return baseUrl */
 
@@ -50,7 +156,7 @@ function site_descript($echo = true) {
     }
 }
 
-
+/* ===================================== THEME FUNCTION END========================================== */
 
 
 /* return store theme path 
@@ -85,15 +191,38 @@ function get_admin_url($p = '/') {
 }
 
 /*
- * get user id
+ * get base path
  */
 
-function get_user_id($echo = true) {
-
+function getRoot($echo = true) {
     if ($echo) {
-        echo Yii::app()->user->id;
+        echo Yii::app()->basePath;
     } else {
-        return Yii::app()->user->id;
+        return Yii::app()->basePath;
+    }
+}
+
+/*
+ * get base path
+ */
+
+function createUrl($url, $echo = true) {
+    if ($echo) {
+        echo Yii::app()->createUrl($url);
+    } else {
+        return Yii::app()->createUrl($url);
+    }
+}
+
+/*
+ * get asset  path
+ */
+
+function get_asset_path($echo = true) {
+    if ($echo) {
+        echo $GLOBALS['_controller']->publish_path;
+    } else {
+        return $GLOBALS['_controller']->publish_path;
     }
 }
 
@@ -150,8 +279,39 @@ function get_theme() {
     }
 }
 
+/*
+ * file header data
+ */
 
-        
+function get_file_data($file, $default_headers, $context = '') {
+
+
+    // We don't need to write to the file, so just open for reading.
+    $fp = fopen($file, 'r');
+
+    // Pull only the first 8kiB of the file in.
+    $file_data = fread($fp, 8192);
+
+    // PHP will close file handle, but we are good citizens.
+    fclose($fp);
+
+    foreach ($default_headers as $field => $regex) {
+        preg_match('/' . preg_quote($regex, '/') . ':(.*)$/mi', $file_data, ${$field});
+        if (!empty(${$field}))
+            ${$field} = trim(preg_replace("/\s*(?:\*\/|\?>).*/", '', ${$field}[1]));
+        else
+            ${$field} = '';
+    }
+
+    $file_data = compact(array_keys($default_headers));
+
+    return $file_data;
+}
+
+/* ===================================== THEME FUNCTION END========================================== */
+
+
+
 /*
  * Translate
  */
@@ -189,40 +349,6 @@ function qr_result($sql = '', $param = array()) {
         return yii::app()->db->createCommand($sql)->queryall();
     }
 }
-
-
-
-/*
- * file header data
- */
-
-function get_file_data($file, $default_headers, $context = '') {
-
-
-    // We don't need to write to the file, so just open for reading.
-    $fp = fopen($file, 'r');
-
-    // Pull only the first 8kiB of the file in.
-    $file_data = fread($fp, 8192);
-
-    // PHP will close file handle, but we are good citizens.
-    fclose($fp);
-
-    foreach ($default_headers as $field => $regex) {
-        preg_match('/' . preg_quote($regex, '/') . ':(.*)$/mi', $file_data, ${$field});
-        if (!empty(${$field}))
-            ${$field} = trim(preg_replace("/\s*(?:\*\/|\?>).*/", '', ${$field}[1]));
-        else
-            ${$field} = '';
-    }
-
-    $file_data = compact(array_keys($default_headers));
-
-    return $file_data;
-}
-
-
-
 
 /*
  * mail send
