@@ -70,6 +70,18 @@ function getUserAttr($attr, $echo = true) {
     }
 }
 
+/*
+ * get user role
+ */
+
+function get_user_role($echo = true) {
+    if ($echo) {
+        echo Yii::app()->user->getState("roles");
+    } else {
+        return Yii::app()->user->getState("roles");
+    }
+}
+
 /* ===================================== USER FUNCTION END ============================================ */
 
 
